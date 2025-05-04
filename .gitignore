@@ -1,0 +1,44 @@
+# Devenv
+.devenv*
+devenv.local.nix
+
+# direnv
+.direnv
+
+# pre-commit
+.pre-commit-config.yaml
+
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+go.work
+
+# Output of the go coverage tool
+coverage.txt
+coverage.html
+
+# Temporary Go test directories
+**/testdata
+
+# Build
+/bin/
+/dist/
+
+# Application specific
+/digest
+
+# Authentication credentials - should never be committed
+authentication.toml
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store

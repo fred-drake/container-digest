@@ -3,7 +3,6 @@ package registry
 import (
 	"testing"
 
-	"github.com/fdrake/container-digest/internal/models"
 	"github.com/regclient/regclient"
 )
 
@@ -11,8 +10,7 @@ import (
 func NewMockClient() *Client {
 	// We don't use real registry clients in tests
 	return &Client{
-		client:          regclient.New(),
-		repoCredentials: make(map[string]models.Credential),
+		client: regclient.New(),
 	}
 }
 
@@ -29,9 +27,5 @@ func TestMockClient(t *testing.T) {
 		t.Error("Mock client has nil regclient")
 	}
 	
-	// Verify the mock client has empty credentials map
-	
-	if len(mockClient.repoCredentials) != 0 {
-		t.Error("Mock client should have empty repoCredentials map")
-	}
+	// Verify the mock client was created successfully
 }

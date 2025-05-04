@@ -32,9 +32,6 @@ coverage.html
 # Application specific
 /digest
 
-# Authentication credentials - should never be committed
-authentication.toml
-
 # IDE files
 .idea/
 .vscode/

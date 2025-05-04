@@ -13,28 +13,16 @@ import (
 
 // Client wraps the Docker registry client
 type Client struct {
-	client          *regclient.RegClient
-	repoCredentials map[string]models.Credential
+	client *regclient.RegClient
 }
 
 // NewClient creates a new registry client
-func NewClient(containersConfig *models.ContainersConfig, authConfig *models.AuthConfig) (*Client, error) {
+func NewClient(containersConfig *models.ContainersConfig) (*Client, error) {
 	// Initialize regclient
 	rc := regclient.New()
 	
-	// Store credentials for later use
-	repoCredentials := make(map[string]models.Credential)
-	
-	// Copy credentials if available
-	if authConfig != nil {
-		for repoKey, cred := range authConfig.Credentials {
-			repoCredentials[repoKey] = cred
-		}
-	}
-	
 	client := &Client{
-		client:          rc,
-		repoCredentials: repoCredentials,
+		client: rc,
 	}
 	
 	return client, nil

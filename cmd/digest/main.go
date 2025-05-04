@@ -14,7 +14,6 @@ import (
 func main() {
 	// Define command-line flags
 	containersFile := flag.String("containers", "containers.toml", "Path to containers TOML file")
-	authFile := flag.String("auth", "authentication.toml", "Path to authentication TOML file")
 	outputFile := flag.String("output", "", "Path to output JSON file (if not specified, output to stdout)")
 	flag.Parse()
 
@@ -25,15 +24,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Load authentication configuration (optional)
-	authConfig, err := config.LoadAuthConfig(*authFile)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Warning: Error loading authentication config: %v\n", err)
-		// Continue without authentication
-	}
-
 	// Create registry client
-	client, err := registry.NewClient(containersConfig, authConfig)
+	client, err := registry.NewClient(containersConfig)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error creating registry client: %v\n", err)
 		os.Exit(1)

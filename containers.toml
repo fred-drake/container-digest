@@ -17,3 +17,9 @@ repository = "ghcr.io"
 name = "fred-drake/python-ssh"
 tag = "latest"
 architectures = ["linux/amd64"]
+
+[[containers]]
+repository = "docker.gitea.com"
+name = "gitea"
+tag = "latest"
+architectures = ["linux/amd64"]

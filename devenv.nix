@@ -9,7 +9,13 @@
   env.GREET = "devenv";
 
   # https://devenv.sh/packages/
-  packages = with pkgs; [git golines delve];
+  packages = with pkgs; [
+    git
+    alejandra
+    golines
+    delve
+    just
+  ];
 
   # https://devenv.sh/languages/
   languages.go.enable = true;

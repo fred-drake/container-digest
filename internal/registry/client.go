@@ -29,18 +29,11 @@ func NewClient(containersConfig *models.ContainersConfig) (*Client, error) {
 }
 
 // GetDigests fetches digests for all containers in the config
-func (c *Client) GetDigests(containersConfig *models.ContainersConfig) (models.DigestResults, error) {
-	results := models.DigestResults{}
+func (c *Client) GetDigests(containersConfig *models.ContainersConfig) (models.NestedDigestResults, error) {
+	results := models.NestedDigestResults{}
 	ctx := context.Background()
 
 	for _, container := range containersConfig.Containers {
-		result := models.DigestResult{
-			Repository:    container.Repository,
-			Name:          container.Name,
-			Tag:           container.Tag,
-			Architectures: []models.ArchDigest{},
-		}
-
 		// For each architecture, get the digest
 		for _, arch := range container.Architectures {
 			// Get the digest for this specific architecture
@@ -50,14 +43,22 @@ func (c *Client) GetDigests(containersConfig *models.ContainersConfig) (models.D
 					container.Repository, container.Name, container.Tag, arch, err)
 			}
 
-			// Add the digest to the result
-			result.Architectures = append(result.Architectures, models.ArchDigest{
-				Architecture: arch,
-				Digest:       digest,
-			})
-		}
+			// Initialize maps if they don't exist
+			if _, exists := results[container.Repository]; !exists {
+				results[container.Repository] = models.RepositoryMap{}
+			}
+			
+			if _, exists := results[container.Repository][container.Name]; !exists {
+				results[container.Repository][container.Name] = models.TagMap{}
+			}
+			
+			if _, exists := results[container.Repository][container.Name][container.Tag]; !exists {
+				results[container.Repository][container.Name][container.Tag] = models.ArchMap{}
+			}
 
-		results = append(results, result)
+			// Add the digest to the nested structure
+			results[container.Repository][container.Name][container.Tag][arch] = digest
+		}
 	}
 
 	return results, nil

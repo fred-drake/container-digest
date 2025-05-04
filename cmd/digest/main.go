@@ -2,67 +2,81 @@ package main
 
 import (
 	"encoding/json"
-	"flag"
 	"fmt"
 	"os"
 	"path/filepath"
 
 	"github.com/fdrake/container-digest/internal/config"
 	"github.com/fdrake/container-digest/internal/registry"
+	"github.com/spf13/cobra"
 )
 
-func main() {
-	// Define command-line flags
-	containersFile := flag.String("containers", "containers.toml", "Path to containers TOML file")
-	outputFile := flag.String("output", "", "Path to output JSON file (if not specified, output to stdout)")
-	flag.Parse()
+var (
+	containersFile string
+	outputFile     string
+)
 
+func runDigest(cmd *cobra.Command, args []string) error {
 	// Load containers configuration
-	containersConfig, err := config.LoadContainersConfig(*containersFile)
+	containersConfig, err := config.LoadContainersConfig(containersFile)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error loading containers config: %v\n", err)
-		os.Exit(1)
+		return fmt.Errorf("error loading containers config: %w", err)
 	}
 
 	// Create registry client
 	client, err := registry.NewClient(containersConfig)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error creating registry client: %v\n", err)
-		os.Exit(1)
+		return fmt.Errorf("error creating registry client: %w", err)
 	}
 
 	// Get digests for all containers
 	results, err := client.GetDigests(containersConfig)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error fetching container digests: %v\n", err)
-		os.Exit(1)
+		return fmt.Errorf("error fetching container digests: %w", err)
 	}
 
 	// Convert results to JSON
 	jsonData, err := json.MarshalIndent(results, "", "  ")
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error encoding results to JSON: %v\n", err)
-		os.Exit(1)
+		return fmt.Errorf("error encoding results to JSON: %w", err)
 	}
 
 	// Output JSON data
-	if *outputFile == "" {
+	if outputFile == "" {
 		// Output to stdout
 		fmt.Println(string(jsonData))
 	} else {
 		// Create parent directories if they don't exist
-		if dir := filepath.Dir(*outputFile); dir != "." {
+		if dir := filepath.Dir(outputFile); dir != "." {
 			if err := os.MkdirAll(dir, 0755); err != nil {
-				fmt.Fprintf(os.Stderr, "Error creating output directory: %v\n", err)
-				os.Exit(1)
+				return fmt.Errorf("error creating output directory: %w", err)
 			}
 		}
 
 		// Write to file
-		if err := os.WriteFile(*outputFile, jsonData, 0644); err != nil {
-			fmt.Fprintf(os.Stderr, "Error writing output to file: %v\n", err)
-			os.Exit(1)
+		if err := os.WriteFile(outputFile, jsonData, 0644); err != nil {
+			return fmt.Errorf("error writing output to file: %w", err)
 		}
-		fmt.Printf("Output written to %s\n", *outputFile)
+		fmt.Printf("Output written to %s\n", outputFile)
+	}
+
+	return nil
+}
+
+func main() {
+	rootCmd := &cobra.Command{
+		Use:   "container-digest",
+		Short: "Get container image digests from registries",
+		Long:  `container-digest reads a TOML file containing docker container information and returns a JSON of the sha256 digests of those containers, along with tags and architectures.`,
+		RunE:  runDigest,
+	}
+
+	// Define command-line flags
+	rootCmd.Flags().StringVar(&containersFile, "containers", "containers.toml", "Path to containers TOML file")
+	rootCmd.Flags().StringVar(&outputFile, "output", "", "Path to output JSON file (if not specified, output to stdout)")
+
+	if err := rootCmd.Execute(); err != nil {
+		fmt.Fprintf(os.Stderr, "%v\n", err)
+		os.Exit(1)
 	}
 }

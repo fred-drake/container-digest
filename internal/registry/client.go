@@ -54,14 +54,14 @@ func (c *Client) GetDigests(containersConfig *models.ContainersConfig) (models.D
 	ctx := context.Background()
 
 	for _, container := range containersConfig.Containers {
-		// Get the repository URL
-		repoURL, ok := c.repoURLs[container.Repository]
+		// Check if the repository exists in the configuration
+		_, ok := c.repoURLs[container.Repository]
 		if !ok {
 			return nil, fmt.Errorf("repository %s not found in configuration", container.Repository)
 		}
 
 		result := models.DigestResult{
-			Repository:    repoURL,
+			Repository:    container.Repository, // Use the repository key instead of the URL
 			Name:          container.Name,
 			Tag:           container.Tag,
 			Architectures: []models.ArchDigest{},

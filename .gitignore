@@ -28,9 +28,7 @@ coverage.html
 # Build
 /bin/
 /dist/
-
-# Application specific
-/digest
+/target/
 
 # IDE files
 .idea/

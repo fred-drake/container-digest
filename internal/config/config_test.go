@@ -13,18 +13,16 @@ func TestLoadContainersConfig(t *testing.T) {
 
 	// Write test TOML content
 	tomlContent := `
-[repositories]
-docker = "https://docker.io"
-github = "https://ghcr.io"
+# Test container configuration
 
 [[containers]]
-repository = "docker"
+repository = "docker.io"
 name = "library/busybox"
 tag = "latest"
 architectures = ["linux/amd64", "linux/arm/v5"]
 
 [[containers]]
-repository = "github"
+repository = "ghcr.io"
 name = "user/repo"
 tag = "1.0.0"
 architectures = ["linux/amd64"]
@@ -41,16 +39,13 @@ architectures = ["linux/amd64"]
 	}
 
 	// Verify the loaded config
-	if len(config.Repositories) != 2 {
-		t.Errorf("Expected 2 repositories, got %d", len(config.Repositories))
-	}
-
-	if config.Repositories["docker"] != "https://docker.io" {
-		t.Errorf("Expected docker repository URL to be 'https://docker.io', got '%s'", config.Repositories["docker"])
-	}
 
 	if len(config.Containers) != 2 {
 		t.Errorf("Expected 2 containers, got %d", len(config.Containers))
+	}
+
+	if config.Containers[0].Repository != "docker.io" {
+		t.Errorf("Expected first container repository to be 'docker.io', got '%s'", config.Containers[0].Repository)
 	}
 
 	if config.Containers[0].Name != "library/busybox" {

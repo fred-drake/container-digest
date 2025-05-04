@@ -13,8 +13,7 @@ import (
 
 // Client wraps the Docker registry client
 type Client struct {
-	client         *regclient.RegClient
-	repoURLs       map[string]string
+	client          *regclient.RegClient
 	repoCredentials map[string]models.Credential
 }
 
@@ -23,14 +22,8 @@ func NewClient(containersConfig *models.ContainersConfig, authConfig *models.Aut
 	// Initialize regclient
 	rc := regclient.New()
 	
-	// Store repository URLs and credentials for later use
-	repoURLs := make(map[string]string)
+	// Store credentials for later use
 	repoCredentials := make(map[string]models.Credential)
-	
-	// Copy repository URLs
-	for repoKey, repoURL := range containersConfig.Repositories {
-		repoURLs[repoKey] = repoURL
-	}
 	
 	// Copy credentials if available
 	if authConfig != nil {
@@ -41,7 +34,6 @@ func NewClient(containersConfig *models.ContainersConfig, authConfig *models.Aut
 	
 	client := &Client{
 		client:          rc,
-		repoURLs:        repoURLs,
 		repoCredentials: repoCredentials,
 	}
 	
@@ -54,14 +46,8 @@ func (c *Client) GetDigests(containersConfig *models.ContainersConfig) (models.D
 	ctx := context.Background()
 
 	for _, container := range containersConfig.Containers {
-		// Check if the repository exists in the configuration
-		_, ok := c.repoURLs[container.Repository]
-		if !ok {
-			return nil, fmt.Errorf("repository %s not found in configuration", container.Repository)
-		}
-
 		result := models.DigestResult{
-			Repository:    container.Repository, // Use the repository key instead of the URL
+			Repository:    container.Repository,
 			Name:          container.Name,
 			Tag:           container.Tag,
 			Architectures: []models.ArchDigest{},
@@ -90,21 +76,8 @@ func (c *Client) GetDigests(containersConfig *models.ContainersConfig) (models.D
 }
 
 // GetDigest fetches the digest for a specific container and architecture
-func (c *Client) GetDigest(ctx context.Context, repoKey, name, tag, architecture string) (string, error) {
-	// Get the repository URL
-	repoURL, ok := c.repoURLs[repoKey]
-	if !ok {
-		return "", fmt.Errorf("repository %s not found in configuration", repoKey)
-	}
-
+func (c *Client) GetDigest(ctx context.Context, registry, name, tag, architecture string) (string, error) {
 	// Create the full reference string (registry/repository:tag)
-	// Extract registry domain from URL
-	registry := strings.TrimPrefix(repoURL, "https://")
-	registry = strings.TrimPrefix(registry, "http://")
-	// Remove trailing slash if present
-	registry = strings.TrimSuffix(registry, "/")
-	
-	// Create the full reference
 	fullRef := fmt.Sprintf("%s/%s:%s", registry, name, tag)
 	
 	// Create image reference
@@ -160,23 +133,10 @@ func (c *Client) GetDigest(ctx context.Context, repoKey, name, tag, architecture
 }
 
 // DebugManifest prints detailed information about a container manifest
-func (c *Client) DebugManifest(repoKey, name, tag string) error {
+func (c *Client) DebugManifest(registry, name, tag string) error {
 	ctx := context.Background()
 	
-	// Get the repository URL
-	repoURL, ok := c.repoURLs[repoKey]
-	if !ok {
-		return fmt.Errorf("repository %s not found in configuration", repoKey)
-	}
-
 	// Create the full reference string (registry/repository:tag)
-	// Extract registry domain from URL
-	registry := strings.TrimPrefix(repoURL, "https://")
-	registry = strings.TrimPrefix(registry, "http://")
-	// Remove trailing slash if present
-	registry = strings.TrimSuffix(registry, "/")
-	
-	// Create the full reference
 	fullRef := fmt.Sprintf("%s/%s:%s", registry, name, tag)
 	
 	// Create image reference

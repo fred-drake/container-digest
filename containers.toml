@@ -1,23 +1,19 @@
 # Sample container configuration
 
-[repositories]
-docker = "https://registry-1.docker.io"
-github = "https://ghcr.io"
-
 [[containers]]
-repository = "docker"
+repository = "docker.io"
 name = "library/busybox"
 tag = "latest"
 architectures = ["linux/amd64", "linux/arm64", "linux/arm/v7"]
 
 [[containers]]
-repository = "docker"
+repository = "docker.io"
 name = "library/alpine"
 tag = "3.14"
 architectures = ["linux/amd64", "linux/arm64"]
 
 [[containers]]
-repository = "github"
+repository = "ghcr.io"
 name = "fred-drake/python-ssh"
 tag = "latest"
 architectures = ["linux/amd64"]

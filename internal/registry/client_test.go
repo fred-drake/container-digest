@@ -12,7 +12,6 @@ func NewMockClient() *Client {
 	// We don't use real registry clients in tests
 	return &Client{
 		client:          regclient.New(),
-		repoURLs:        make(map[string]string),
 		repoCredentials: make(map[string]models.Credential),
 	}
 }
@@ -30,10 +29,7 @@ func TestMockClient(t *testing.T) {
 		t.Error("Mock client has nil regclient")
 	}
 	
-	// Verify the mock client has empty maps
-	if len(mockClient.repoURLs) != 0 {
-		t.Error("Mock client should have empty repoURLs map")
-	}
+	// Verify the mock client has empty credentials map
 	
 	if len(mockClient.repoCredentials) != 0 {
 		t.Error("Mock client should have empty repoCredentials map")

@@ -2,13 +2,12 @@ package models
 
 // ContainersConfig represents the structure of containers.toml file
 type ContainersConfig struct {
-	Repositories map[string]string `toml:"repositories"` // Key is the label, value is the repository URL
-	Containers   []Container       `toml:"containers"`   // List of containers to fetch digests for
+	Containers []Container `toml:"containers"` // List of containers to fetch digests for
 }
 
 // Container represents a container entry in the containers.toml file
 type Container struct {
-	Repository   string   `toml:"repository"`   // Key that matches a key in Repositories
+	Repository   string   `toml:"repository"`   // Repository hostname (e.g., docker.io, ghcr.io)
 	Name         string   `toml:"name"`         // Container name (e.g., library/busybox)
 	Tag          string   `toml:"tag"`          // Container tag (e.g., latest)
 	Architectures []string `toml:"architectures"` // List of architectures (e.g., "linux/amd64", "linux/arm/v5")

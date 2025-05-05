@@ -44,15 +44,27 @@ func runDigest(cmd *cobra.Command, args []string) error {
 
 	switch outputFormat {
 	case "json":
+		// Transform results to include full image references
+		transformedResults, err := transformResultsWithFullRefs(results)
+		if err != nil {
+			return fmt.Errorf("error transforming results: %w", err)
+		}
+		
 		// Convert results to JSON
-		outputData, err = json.MarshalIndent(results, "", "  ")
+		outputData, err = json.MarshalIndent(transformedResults, "", "  ")
 		if err != nil {
 			return fmt.Errorf("error encoding results to JSON: %w", err)
 		}
 		formatName = "JSON"
 	case "nix":
+		// Transform results to include full image references
+		transformedResults, err := transformResultsWithFullRefs(results)
+		if err != nil {
+			return fmt.Errorf("error transforming results: %w", err)
+		}
+		
 		// Convert results to Nix format
-		nixOutput, err := formatAsNix(results)
+		nixOutput, err := formatAsNix(transformedResults)
 		if err != nil {
 			return fmt.Errorf("error encoding results to Nix format: %w", err)
 		}
@@ -102,9 +114,9 @@ func formatAsNix(results models.NestedDigestResults) (string, error) {
 				nixOutput += fmt.Sprintf("      \"%s\" = {\n", escapeNixString(tag))
 
 				// Iterate through architectures
-				for arch, digest := range archs {
+				for arch, fullImageRef := range archs {
 					nixOutput += fmt.Sprintf("        \"%s\" = \"%s\";\n",
-						escapeNixString(arch), escapeNixString(digest))
+						escapeNixString(arch), escapeNixString(fullImageRef))
 				}
 
 				nixOutput += "      };\n"
@@ -127,6 +139,35 @@ func escapeNixString(s string) string {
 	s = strings.ReplaceAll(s, "\"", "\\\"")
 	s = strings.ReplaceAll(s, "$", "\\$")
 	return s
+}
+
+// transformResultsWithFullRefs transforms the nested digest results to include full image references
+func transformResultsWithFullRefs(results models.NestedDigestResults) (models.NestedDigestResults, error) {
+	transformedResults := models.NestedDigestResults{}
+	
+	// Iterate through registries
+	for registry, repositories := range results {
+		transformedResults[registry] = models.RepositoryMap{}
+		
+		// Iterate through repositories
+		for repo, tags := range repositories {
+			transformedResults[registry][repo] = models.TagMap{}
+			
+			// Iterate through tags
+			for tag, archs := range tags {
+				transformedResults[registry][repo][tag] = models.ArchMap{}
+				
+				// Iterate through architectures
+				for arch, digest := range archs {
+					// Format the full image reference with digest
+					fullImageRef := fmt.Sprintf("%s/%s@%s", registry, repo, digest)
+					transformedResults[registry][repo][tag][arch] = fullImageRef
+				}
+			}
+		}
+	}
+	
+	return transformedResults, nil
 }
 
 func main() {

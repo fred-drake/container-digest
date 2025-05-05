@@ -1,6 +1,6 @@
 # Container Digest
 
-A Go application that reads a TOML file containing Docker container information and returns the SHA256 digests of those containers, along with their tags and architectures.
+A Go application that reads a TOML file containing Docker container information and returns the full image references with SHA256 digests of those containers, along with their tags and architectures.
 
 I use this to declaratively configure my container images in my Nix configurations.
 
@@ -73,29 +73,29 @@ When using the default `--output-format=json`, the application outputs a JSON st
   "docker.gitea.com": {
     "gitea": {
       "latest": {
-        "linux/amd64": "sha256:5ee30f...de6367"
+        "linux/amd64": "docker.gitea.com/gitea@sha256:5ee30f...de6367"
       }
     }
   },
   "docker.io": {
     "library/busybox": {
       "latest": {
-        "linux/amd64": "sha256:ad9fa4...948f9f",
-        "linux/arm/v7": "sha256:b1d1f0...5184d6",
-        "linux/arm64": "sha256:fa8dc7...3d744b"
+        "linux/amd64": "docker.io/library/busybox@sha256:ad9fa4...948f9f",
+        "linux/arm/v7": "docker.io/library/busybox@sha256:b1d1f0...5184d6",
+        "linux/arm64": "docker.io/library/busybox@sha256:fa8dc7...3d744b"
       }
     },
     "library/postgres": {
       "16-alpine": {
-        "linux/amd64": "sha256:b0193a...4c27b1",
-        "linux/arm64": "sha256:afa9bf...5e0e41"
+        "linux/amd64": "docker.io/library/postgres@sha256:b0193a...4c27b1",
+        "linux/arm64": "docker.io/library/postgres@sha256:afa9bf...5e0e41"
       }
     }
   },
   "ghcr.io": {
     "home-assistant/home-assistant": {
       "latest": {
-        "linux/amd64": "sha256:ef20dc...c940ca"
+        "linux/amd64": "ghcr.io/home-assistant/home-assistant@sha256:ef20dc...c940ca"
       }
     }
   }
@@ -111,29 +111,29 @@ When using `--output-format=nix`, the application outputs a Nix attribute set th
   "docker.gitea.com" = {
     "gitea" = {
       "latest" = {
-        "linux/amd64" = "sha256:5ee30f...de6367";
+        "linux/amd64" = "docker.gitea.com/gitea@sha256:5ee30f...de6367";
       };
     };
   };
   "docker.io" = {
     "library/busybox" = {
       "latest" = {
-        "linux/amd64" = "sha256:ad9fa4...948f9f";
-        "linux/arm/v7" = "sha256:b1d1f0...5184d6";
-        "linux/arm64" = "sha256:fa8dc7...3d744b";
+        "linux/amd64" = "docker.io/library/busybox@sha256:ad9fa4...948f9f";
+        "linux/arm/v7" = "docker.io/library/busybox@sha256:b1d1f0...5184d6";
+        "linux/arm64" = "docker.io/library/busybox@sha256:fa8dc7...3d744b";
       };
     };
     "library/postgres" = {
       "16-alpine" = {
-        "linux/amd64" = "sha256:b0193a...4c27b1";
-        "linux/arm64" = "sha256:afa9bf...5e0e41";
+        "linux/amd64" = "docker.io/library/postgres@sha256:b0193a...4c27b1";
+        "linux/arm64" = "docker.io/library/postgres@sha256:afa9bf...5e0e41";
       };
     };
   };
   "ghcr.io" = {
     "home-assistant/home-assistant" = {
       "latest" = {
-        "linux/amd64" = "sha256:ef20dc...c940ca";
+        "linux/amd64" = "ghcr.io/home-assistant/home-assistant@sha256:ef20dc...c940ca";
       };
     };
   };

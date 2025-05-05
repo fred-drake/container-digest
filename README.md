@@ -8,7 +8,7 @@ I use this to declaratively configure my container images in my Nix configuratio
 
 - Reads container information from a TOML configuration file
 - Supports multiple architectures per container
-- Outputs digests in JSON format
+- Outputs digests in JSON or Nix format
 
 ## Installation
 
@@ -27,7 +27,8 @@ Available recipes:
 ### Command-line options
 
 - `--containers`: Path to the containers TOML file (default: "containers.toml")
-- `--output`: Path to the output JSON file (if not specified, output to stdout)
+- `--output`: Path to the output file (if not specified, output to stdout)
+- `--output-format`: Output format, either "json" or "nix" (default: "json")
 
 ## Configuration
 
@@ -59,9 +60,13 @@ tag = "latest"
 architectures = ["linux/amd64"]
 ```
 
-## Output Format
+## Output Formats
 
-The application outputs a JSON array of container digest information:
+The application supports two output formats: JSON and Nix.
+
+### JSON Format
+
+When using the default `--output-format=json`, the application outputs a JSON structure of container digest information:
 
 ```json
 {
@@ -94,5 +99,43 @@ The application outputs a JSON array of container digest information:
       }
     }
   }
+}
+```
+
+### Nix Format
+
+When using `--output-format=nix`, the application outputs a Nix attribute set that can be directly imported into Nix configurations:
+
+```nix
+{
+  "docker.gitea.com" = {
+    "gitea" = {
+      "latest" = {
+        "linux/amd64" = "sha256:5ee30f...de6367";
+      };
+    };
+  };
+  "docker.io" = {
+    "library/busybox" = {
+      "latest" = {
+        "linux/amd64" = "sha256:ad9fa4...948f9f";
+        "linux/arm/v7" = "sha256:b1d1f0...5184d6";
+        "linux/arm64" = "sha256:fa8dc7...3d744b";
+      };
+    };
+    "library/postgres" = {
+      "16-alpine" = {
+        "linux/amd64" = "sha256:b0193a...4c27b1";
+        "linux/arm64" = "sha256:afa9bf...5e0e41";
+      };
+    };
+  };
+  "ghcr.io" = {
+    "home-assistant/home-assistant" = {
+      "latest" = {
+        "linux/amd64" = "sha256:ef20dc...c940ca";
+      };
+    };
+  };
 }
 ```

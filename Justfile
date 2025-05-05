@@ -11,9 +11,14 @@ app := "container-digest"
 # Define target directory variable
 target-dir := "target"
 
+# Clean up the build directory
 clean:
     @echo "Cleaning up..."
     rm -rf {{target-dir}}
+
+# Run the application
+run:
+    go run ./cmd/{{app}}/main.go
 
 # Build the container-digest application
 build:

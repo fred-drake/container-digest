@@ -49,7 +49,7 @@ func runDigest(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return fmt.Errorf("error transforming results: %w", err)
 		}
-		
+
 		// Convert results to JSON
 		outputData, err = json.MarshalIndent(transformedResults, "", "  ")
 		if err != nil {
@@ -62,7 +62,7 @@ func runDigest(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return fmt.Errorf("error transforming results: %w", err)
 		}
-		
+
 		// Convert results to Nix format
 		nixOutput, err := formatAsNix(transformedResults)
 		if err != nil {
@@ -99,7 +99,7 @@ func runDigest(cmd *cobra.Command, args []string) error {
 // formatAsNix converts the digest results to Nix format
 func formatAsNix(results models.NestedDigestResults) (string, error) {
 	var nixOutput string
-	nixOutput = "{\n"
+	nixOutput = "{pkgs, ...}: {\n"
 
 	// Iterate through registries
 	for registry, repositories := range results {
@@ -144,19 +144,19 @@ func escapeNixString(s string) string {
 // transformResultsWithFullRefs transforms the nested digest results to include full image references
 func transformResultsWithFullRefs(results models.NestedDigestResults) (models.NestedDigestResults, error) {
 	transformedResults := models.NestedDigestResults{}
-	
+
 	// Iterate through registries
 	for registry, repositories := range results {
 		transformedResults[registry] = models.RepositoryMap{}
-		
+
 		// Iterate through repositories
 		for repo, tags := range repositories {
 			transformedResults[registry][repo] = models.TagMap{}
-			
+
 			// Iterate through tags
 			for tag, archs := range tags {
 				transformedResults[registry][repo][tag] = models.ArchMap{}
-				
+
 				// Iterate through architectures
 				for arch, digest := range archs {
 					// Format the full image reference with digest
@@ -166,7 +166,7 @@ func transformResultsWithFullRefs(results models.NestedDigestResults) (models.Ne
 			}
 		}
 	}
-	
+
 	return transformedResults, nil
 }
 

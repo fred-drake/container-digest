@@ -15,6 +15,8 @@
     golines
     delve
     just
+    nodejs_22
+    uv
   ];
 
   # https://devenv.sh/languages/

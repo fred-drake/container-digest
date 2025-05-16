@@ -106,11 +106,11 @@ func runDigest(cmd *cobra.Command, args []string) error {
 // formatAsNix converts the digest results to Nix format with alphabetically sorted keys
 func formatAsNix(results models.NestedDigestResults) (string, error) {
 	var nixOutput string
-	nixOutput = "{pkgs, ...}: {\n"
+	nixOutput = "{...}: {\n"
 
 	// Get sorted registry keys
 	registryKeys := getSortedKeys(results)
-	
+
 	// Iterate through registries in sorted order
 	for _, registry := range registryKeys {
 		repositories := results[registry]
@@ -118,7 +118,7 @@ func formatAsNix(results models.NestedDigestResults) (string, error) {
 
 		// Get sorted repository keys
 		repoKeys := getSortedKeys(repositories)
-		
+
 		// Iterate through repositories in sorted order
 		for _, repo := range repoKeys {
 			tags := repositories[repo]
@@ -126,7 +126,7 @@ func formatAsNix(results models.NestedDigestResults) (string, error) {
 
 			// Get sorted tag keys
 			tagKeys := getSortedKeys(tags)
-			
+
 			// Iterate through tags in sorted order
 			for _, tag := range tagKeys {
 				archs := tags[tag]
@@ -134,7 +134,7 @@ func formatAsNix(results models.NestedDigestResults) (string, error) {
 
 				// Get sorted architecture keys
 				archKeys := getSortedKeys(archs)
-				
+
 				// Iterate through architectures in sorted order
 				for _, arch := range archKeys {
 					fullImageRef := archs[arch]
@@ -199,12 +199,12 @@ func getSortedKeys(m interface{}) []string {
 	if v.Kind() != reflect.Map {
 		return nil
 	}
-	
+
 	keys := make([]string, 0, v.Len())
 	for _, k := range v.MapKeys() {
 		keys = append(keys, k.String())
 	}
-	
+
 	sort.Strings(keys)
 	return keys
 }
@@ -220,11 +220,11 @@ func (o *orderedJSON) MarshalIndent() ([]byte, error) {
 	encoder := json.NewEncoder(buffer)
 	encoder.SetIndent("", "  ")
 	encoder.SetEscapeHTML(false)
-	
+
 	if err := o.marshalValue(buffer, o.Value, 0); err != nil {
 		return nil, err
 	}
-	
+
 	return buffer.Bytes(), nil
 }
 
@@ -234,7 +234,7 @@ func (o *orderedJSON) marshalValue(buffer *bytes.Buffer, v interface{}, indent i
 		buffer.WriteString("null")
 		return nil
 	}
-	
+
 	rv := reflect.ValueOf(v)
 	switch rv.Kind() {
 	case reflect.Map:
@@ -255,37 +255,37 @@ func (o *orderedJSON) marshalValue(buffer *bytes.Buffer, v interface{}, indent i
 // marshalMap marshals a map with alphabetically sorted keys
 func (o *orderedJSON) marshalMap(buffer *bytes.Buffer, rv reflect.Value, indent int) error {
 	buffer.WriteString("{")
-	
+
 	// Get and sort the keys
 	keys := make([]string, 0, rv.Len())
 	for _, k := range rv.MapKeys() {
 		keys = append(keys, k.String())
 	}
 	sort.Strings(keys)
-	
+
 	// Write each key-value pair
 	for i, key := range keys {
 		if i > 0 {
 			buffer.WriteString(",")
 		}
 		buffer.WriteString("\n" + strings.Repeat("  ", indent+1))
-		
+
 		// Marshal the key
 		keyJSON, err := json.Marshal(key)
 		if err != nil {
 			return err
 		}
 		buffer.Write(keyJSON)
-		
+
 		buffer.WriteString(": ")
-		
+
 		// Marshal the value
 		value := rv.MapIndex(reflect.ValueOf(key))
 		if err := o.marshalValue(buffer, value.Interface(), indent+1); err != nil {
 			return err
 		}
 	}
-	
+
 	if len(keys) > 0 {
 		buffer.WriteString("\n" + strings.Repeat("  ", indent))
 	}
@@ -296,20 +296,20 @@ func (o *orderedJSON) marshalMap(buffer *bytes.Buffer, rv reflect.Value, indent 
 // marshalSlice marshals a slice or array
 func (o *orderedJSON) marshalSlice(buffer *bytes.Buffer, rv reflect.Value, indent int) error {
 	buffer.WriteString("[")
-	
+
 	// Write each element
 	for i := 0; i < rv.Len(); i++ {
 		if i > 0 {
 			buffer.WriteString(",")
 		}
 		buffer.WriteString("\n" + strings.Repeat("  ", indent+1))
-		
+
 		// Marshal the element
 		if err := o.marshalValue(buffer, rv.Index(i).Interface(), indent+1); err != nil {
 			return err
 		}
 	}
-	
+
 	if rv.Len() > 0 {
 		buffer.WriteString("\n" + strings.Repeat("  ", indent))
 	}

@@ -18,8 +18,8 @@ type Client struct {
 
 // NewClient creates a new registry client
 func NewClient(containersConfig *models.ContainersConfig) (*Client, error) {
-	// Initialize regclient
-	rc := regclient.New()
+	// Initialize regclient with Docker config
+	rc := regclient.New(regclient.WithDockerCreds(), regclient.WithDockerCerts())
 	
 	client := &Client{
 		client: rc,

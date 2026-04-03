@@ -21,11 +21,11 @@ func TestMockClient(t *testing.T) {
 	if mockClient == nil {
 		t.Fatal("Failed to create mock client")
 	}
-	
+
 	// Verify the mock client was created
 	if mockClient.client == nil {
 		t.Error("Mock client has nil regclient")
 	}
-	
+
 	// Verify the mock client was created successfully
 }

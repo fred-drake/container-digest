@@ -142,7 +142,7 @@ func TestGetSortedKeys(t *testing.T) {
 	}
 
 	keys := getSortedKeys(testMap)
-	
+
 	// Check length
 	if len(keys) != 3 {
 		t.Errorf("Expected 3 keys, got %d", len(keys))

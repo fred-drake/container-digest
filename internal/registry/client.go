@@ -20,11 +20,11 @@ type Client struct {
 func NewClient(containersConfig *models.ContainersConfig) (*Client, error) {
 	// Initialize regclient with Docker config
 	rc := regclient.New(regclient.WithDockerCreds(), regclient.WithDockerCerts())
-	
+
 	client := &Client{
 		client: rc,
 	}
-	
+
 	return client, nil
 }
 
@@ -39,7 +39,7 @@ func (c *Client) GetDigests(containersConfig *models.ContainersConfig) (models.N
 			// Get the digest for this specific architecture
 			digest, err := c.GetDigest(ctx, container.Repository, container.Name, container.Tag, arch)
 			if err != nil {
-				return nil, fmt.Errorf("failed to get digest for %s/%s:%s (%s): %w", 
+				return nil, fmt.Errorf("failed to get digest for %s/%s:%s (%s): %w",
 					container.Repository, container.Name, container.Tag, arch, err)
 			}
 
@@ -47,11 +47,11 @@ func (c *Client) GetDigests(containersConfig *models.ContainersConfig) (models.N
 			if _, exists := results[container.Repository]; !exists {
 				results[container.Repository] = models.RepositoryMap{}
 			}
-			
+
 			if _, exists := results[container.Repository][container.Name]; !exists {
 				results[container.Repository][container.Name] = models.TagMap{}
 			}
-			
+
 			if _, exists := results[container.Repository][container.Name][container.Tag]; !exists {
 				results[container.Repository][container.Name][container.Tag] = models.ArchMap{}
 			}
@@ -68,7 +68,7 @@ func (c *Client) GetDigests(containersConfig *models.ContainersConfig) (models.N
 func (c *Client) GetDigest(ctx context.Context, registry, name, tag, architecture string) (string, error) {
 	// Create the full reference string (registry/repository:tag)
 	fullRef := fmt.Sprintf("%s/%s:%s", registry, name, tag)
-	
+
 	// Create image reference
 	imageRef, err := ref.New(fullRef)
 	if err != nil {
@@ -77,16 +77,16 @@ func (c *Client) GetDigest(ctx context.Context, registry, name, tag, architectur
 
 	// Parse the architecture string (e.g., "linux/amd64" -> OS: "linux", Architecture: "amd64")
 	parts := strings.Split(architecture, "/")
-	
+
 	plat := platform.Platform{
 		OS:           "linux", // Default to linux
 		Architecture: "",
 	}
-	
+
 	if len(parts) >= 2 {
 		plat.OS = parts[0]
 		plat.Architecture = parts[1]
-		
+
 		// Handle arm variants (e.g., "linux/arm/v7")
 		if len(parts) >= 3 && parts[1] == "arm" {
 			plat.Variant = parts[2]
@@ -95,7 +95,7 @@ func (c *Client) GetDigest(ctx context.Context, registry, name, tag, architectur
 		// If the format is not as expected, use the whole string as architecture
 		plat.Architecture = architecture
 	}
-	
+
 	// If architecture is still empty, default to amd64
 	if plat.Architecture == "" {
 		plat.Architecture = "amd64"
@@ -124,10 +124,10 @@ func (c *Client) GetDigest(ctx context.Context, registry, name, tag, architectur
 // DebugManifest prints detailed information about a container manifest
 func (c *Client) DebugManifest(registry, name, tag string) error {
 	ctx := context.Background()
-	
+
 	// Create the full reference string (registry/repository:tag)
 	fullRef := fmt.Sprintf("%s/%s:%s", registry, name, tag)
-	
+
 	// Create image reference
 	imageRef, err := ref.New(fullRef)
 	if err != nil {
@@ -143,7 +143,7 @@ func (c *Client) DebugManifest(registry, name, tag string) error {
 	// Print manifest details
 	fmt.Printf("Manifest Type: %s\n", manifest.GetMediaType())
 	fmt.Printf("Manifest Digest: %s\n", manifest.GetDescriptor().Digest.String())
-	
+
 	// Check if this is a manifest list
 	if manifest.IsList() {
 		// For manifest lists, try to get platform list using the manifest API
@@ -159,6 +159,6 @@ func (c *Client) DebugManifest(registry, name, tag string) error {
 			}
 		}
 	}
-	
+
 	return nil
 }
